@@ -25,13 +25,18 @@ def main():
 
     args = parser.parse_args()
     sample(args)
-
-def sample(args):
-    with open(os.path.join(args['save_dir'], 'config.pkl'), 'rb') as f:
-        saved_args = cPickle.load(f)
-    with open(os.path.join(args['save_dir'], 'chars_vocab.pkl'), 'rb') as f:
-        chars, vocab = cPickle.load(f)
-    model = Model(saved_args, True)
+def sample(args, init = True):
+    global model
+    global chars
+    global vocab
+    global saved_args
+    if init:
+        with open(os.path.join("save/new2", 'config.pkl'), 'rb') as f:
+            print('yo')
+            saved_args = cPickle.load(f)
+            with open(os.path.join("save/new2", 'chars_vocab.pkl'), 'rb') as f:
+                chars, vocab = cPickle.load(f)
+                model = Model(saved_args, True)
     with tf.Session() as sess:
         tf.global_variables_initializer().run()
         saver = tf.train.Saver(tf.global_variables())
@@ -39,6 +44,7 @@ def sample(args):
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(sess, ckpt.model_checkpoint_path)
             return model.sample(sess, chars, vocab, args['n'], args['prime'], args['sample'])
+            tf.reset_default_graph()
 
 if __name__ == '__main__':
     main()
