@@ -20,7 +20,7 @@ class Generate(Resource):
     def get(self):
         global n
         args = parser.parse_args()
-        sample_args = {'save_dir': 'save/new2', 'n': 10, 'prime': args.start_text, 'sample': 1}
+        sample_args = {'save_dir': 'save/new2', 'n': 100, 'prime': args.start_text, 'sample': 1}
         sampled_text = sample.sample(sample_args, init = not(n>0))[len(args.start_text)::]
         result = {'completions': [sampled_text], 'start_text': args.start_text, 'time': 15}
         n += 1

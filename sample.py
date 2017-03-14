@@ -25,6 +25,7 @@ def main():
 
     args = parser.parse_args()
     sample(args)
+
 def sample(args, init = True):
     global model
     global chars

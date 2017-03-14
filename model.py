@@ -8,7 +8,7 @@ class Model():
     def __init__(self, args, infer=False):
         self.args = args
         if infer:
-            args.batch_size = 1
+            args.batch_size = 1 #100
             args.seq_length = 1
 
         if args.model == 'rnn':

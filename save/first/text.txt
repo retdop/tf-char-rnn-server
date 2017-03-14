@@ -1,0 +1,17 @@
+from flask import Flask, request
+from flask_restful import Resource, Api
+from json import dumps
+from flask_restful import reqparse
+import sample
+
+
+app = Flask(__name__)
+api = Api(app)
+
+parser = reqparse.RequestParser()
+parser.add_argument('start_text', type=str, help='Starting text')
+parser.add_argument('n', type=int, help='Number of suggestions per request')
+
+class Home(Resource):
+    def get(self):
+                       
