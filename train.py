@@ -1,6 +1,7 @@
 from __future__ import print_function
 import numpy as np
 import tensorflow as tf
+import random
 
 import argparse
 import time
@@ -11,9 +12,9 @@ from utils import TextLoader
 from model import Model
 
 def main():
-    python3 train.py --data_dir data/python
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data_dir', type=str, default='data/tinyshakespeare',
+    # shouldn't it be default='data/' tout court ? 
+    parser.add_argument('--data_dir', type=str, default='data/python',
                        help='data directory containing input.txt')
     parser.add_argument('--save_dir', type=str, default='save',
                        help='directory to store checkpointed models')
@@ -88,6 +89,19 @@ def train(args):
         # restore model
         if args.init_from is not None:
             saver.restore(sess, ckpt.model_checkpoint_path)
+        
+        validation_batches = [random.randint(0,data_loader.num_batches) for i in range(int(data_loader.num_batches/10))]
+        validation_feed = {model.input_data: np.array([]), model.targets: np.array([])}
+
+        for b in range(data_loader.num_batches):
+            data_loader.reset_batch_pointer()
+            x, y = data_loader.next_batch()
+            if b in validation_batches:
+                    validation_feed[model.input_data] = np.append(validation_feed[model.input_data], x)
+                    validation_feed[model.targets] = np.append(validation_feed[model.targets], y)
+            else:
+                pass
+
         for e in range(args.num_epochs):
             sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** e)))
             data_loader.reset_batch_pointer()
@@ -99,6 +113,7 @@ def train(args):
                 for i, (c, h) in enumerate(model.initial_state):
                     feed[c] = state[i].c
                     feed[h] = state[i].h
+
                 train_loss, state, _ = sess.run([model.cost, model.final_state, model.train_op], feed)
                 end = time.time()
                 print("{}/{} (epoch {}), train_loss = {:.3f}, time/batch = {:.3f}" \
@@ -110,6 +125,11 @@ def train(args):
                     checkpoint_path = os.path.join(args.save_dir, 'model.ckpt')
                     saver.save(sess, checkpoint_path, global_step = e * data_loader.num_batches + b)
                     print("model saved to {}".format(checkpoint_path))
+                    validation_loss = sess.run([model.cost, model.final_state], feed_dict=validation_feed)
+                    print("validation loss=", validation_loss)
+
+        validation_loss_global = sess.run([model.cost, model.final_state], feed_dict=validation_feed)
+        print("validation loss after training =", validation_loss_global)
 
 if __name__ == '__main__':
     main()
