@@ -74,11 +74,18 @@ def train(args):
             saved_chars, saved_vocab = cPickle.load(f)
         assert saved_chars==data_loader.chars, "Data and loaded model disagree on character set!"
         assert saved_vocab==data_loader.vocab, "Data and loaded model disagree on dictionary mappings!"
+    try:
+        with open(os.path.join(args.save_dir, 'config.pkl'), 'wb') as f:
+            cPickle.dump(args, f)
+        with open(os.path.join(args.save_dir, 'chars_vocab.pkl'), 'wb') as f:
+            cPickle.dump((data_loader.chars, data_loader.vocab), f)
+    except FileNotFoundError as e:
+        os.mkdir(args.save_dir)
+        with open(os.path.join(args.save_dir, 'config.pkl'), 'wb') as f:
+            cPickle.dump(args, f)
+        with open(os.path.join(args.save_dir, 'chars_vocab.pkl'), 'wb') as f:
+            cPickle.dump((data_loader.chars, data_loader.vocab), f)
 
-    with open(os.path.join(args.save_dir, 'config.pkl'), 'wb') as f:
-        cPickle.dump(args, f)
-    with open(os.path.join(args.save_dir, 'chars_vocab.pkl'), 'wb') as f:
-        cPickle.dump((data_loader.chars, data_loader.vocab), f)
 
     model = Model(args)
 

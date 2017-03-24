@@ -48,7 +48,7 @@ def objective(args, parameters):
     params.num_layers = args['num_layers']
     params.seq_length = args['seq_length']
     params.learning_rate = args['learning_rate']
-
+    params.save_dir = params.save_dir + '/' + str(args['rnn_size']) + '_' + str(args['num_layers']) + '_' + str(args['seq_length']) + '_' + str(args['learning_rate'])
     loss = train(params)
 
     return loss
