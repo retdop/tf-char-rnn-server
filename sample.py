@@ -32,10 +32,10 @@ def sample(args, init = True):
     global vocab
     global saved_args
     if init:
-        with open(os.path.join("save/new2", 'config.pkl'), 'rb') as f:
+        with open(os.path.join("save/last", 'config.pkl'), 'rb') as f:
             print('yo')
             saved_args = cPickle.load(f)
-            with open(os.path.join("save/new2", 'chars_vocab.pkl'), 'rb') as f:
+            with open(os.path.join("save/last", 'chars_vocab.pkl'), 'rb') as f:
                 chars, vocab = cPickle.load(f)
                 model = Model(saved_args, True)
     with tf.Session() as sess:
