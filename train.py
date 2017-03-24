@@ -88,18 +88,26 @@ def train(args):
         # restore model
         if args.init_from is not None:
             saver.restore(sess, ckpt.model_checkpoint_path)
+        
+        # creation validation batches
+        num_validation_batches = int(data_loader.num_batches/10)
+        validation_batches = [random.randint(0,data_loader.num_batches) for i in range(num_validation_batches)]
+        validation_feed = {}
+        validation_feed["x"] = []
+        validation_feed["y"] = []
 
-        validation_batches = [random.randint(0,data_loader.num_batches) for i in range(int(data_loader.num_batches/10))]
-        validation_feed = {model.input_data: np.array([]), model.targets: np.array([])}
-
+        print("creating validation batches...")
         for b in range(data_loader.num_batches):
             data_loader.reset_batch_pointer()
             x, y = data_loader.next_batch()
             if b in validation_batches:
-                    validation_feed[model.input_data] = np.append(validation_feed[model.input_data], x)
-                    validation_feed[model.targets] = np.append(validation_feed[model.targets], y)
+                    validation_feed["x"].append(x)
+                    validation_feed["y"].append(y)
+                    print ("new batch added")
             else:
                 pass
+        #validation_feed["x"] = np.split(validation_feed["x"].reshape(data_loader.batch_size, -1), num_validation_batches, 1)
+        #validation_feed["y"] = np.split(validation_feed["y"].reshape(data_loader.batch_size, -1), num_validation_batches, 1)
 
         for e in range(args.num_epochs):
             sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** e)))
@@ -119,12 +127,35 @@ def train(args):
                     .format(e * data_loader.num_batches + b,
                             args.num_epochs * data_loader.num_batches,
                             e, train_loss, end - start))
+                # test
+                # computation of the validation loss
+                validation_loss = 0
+                print("test computing validation loss")
+                for i in range(num_validation_batches):
+                    print("computing loss on the {}th validation batch".format(i))
+                    validation_feed_batch = {}
+                    validation_feed_batch[model.input_data] = validation_feed["x"][i]
+                    validation_feed_batch[model.targets] = validation_feed["y"][i]
+                    validation_loss += sess.run([model.cost, model.final_state], feed_dict=validation_feed_batch)[0]
+                validation_loss = validation_loss/num_validation_batches
+                print("loss=", validation_loss)
+
                 if (e * data_loader.num_batches + b) % args.save_every == 0\
                     or (e==args.num_epochs-1 and b == data_loader.num_batches-1): # save for the last result
                     checkpoint_path = os.path.join(args.save_dir, 'model.ckpt')
                     saver.save(sess, checkpoint_path, global_step = e * data_loader.num_batches + b)
                     print("model saved to {}".format(checkpoint_path))
-                    validation_loss = sess.run([model.cost, model.final_state], feed_dict=validation_feed)
+
+                    # computation of the validation loss
+                    validation_loss = 0
+                    print("computing validation loss")
+                    for i in range(num_validation_batches):
+                        print("computing loss on the {}th validation batch".format(i))
+                        validation_feed_batch = {}
+                        validation_feed_batch[model.input_data] = validation_feed["x"][i]
+                        validation_feed_batch[model.targets] = validation_feed["y"][i]
+                        validation_loss += sess.run([model.cost, model.final_state], feed_dict=validation_feed_batch)[0]
+                        
                     print("validation loss=", validation_loss)
 
         validation_loss_global = sess.run([model.cost, model.final_state], feed_dict=validation_feed)
