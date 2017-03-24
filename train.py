@@ -13,9 +13,8 @@ from model import Model
 
 def main():
     parser = argparse.ArgumentParser()
-    # shouldn't it be default='data/' tout court ? 
     parser.add_argument('--data_dir', type=str, default='data/python',
-                       help='data directory containing input.txt')
+                       help='data directory containing scikit_cleaned.txt')
     parser.add_argument('--save_dir', type=str, default='save',
                        help='directory to store checkpointed models')
     parser.add_argument('--rnn_size', type=int, default=128,
@@ -89,7 +88,7 @@ def train(args):
         # restore model
         if args.init_from is not None:
             saver.restore(sess, ckpt.model_checkpoint_path)
-        
+
         validation_batches = [random.randint(0,data_loader.num_batches) for i in range(int(data_loader.num_batches/10))]
         validation_feed = {model.input_data: np.array([]), model.targets: np.array([])}
 
@@ -131,5 +130,6 @@ def train(args):
         validation_loss_global = sess.run([model.cost, model.final_state], feed_dict=validation_feed)
         print("validation loss after training =", validation_loss_global)
 
+        return validation_loss_global
 if __name__ == '__main__':
     main()
