@@ -114,7 +114,6 @@ def train(args):
             else:
                 pass
 
-        validation_loss_end = 0
         for e in range(args.num_epochs):
             sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** e)))
             data_loader.reset_batch_pointer()
@@ -143,16 +142,24 @@ def train(args):
                     # computation of the validation loss
                     validation_loss = 0
                     # print("computing validation loss")
-                    for i in range(num_validation_batches):
+                    for i in range(int(num_validation_batches/10)):
                         # print("computing loss on the {}th validation batch".format(i))
                         validation_feed_batch = {}
                         validation_feed_batch[model.input_data] = validation_feed["x"][i]
                         validation_feed_batch[model.targets] = validation_feed["y"][i]
                         validation_loss += sess.run([model.cost, model.final_state], feed_dict=validation_feed_batch)[0]
-                    validation_loss = validation_loss/num_validation_batches
+                    validation_loss = 10*validation_loss/num_validation_batches
                     print("validation loss=", validation_loss)
-                    validation_loss_end = validation_loss
 
+        validation_loss_end = 0
+        # print("computing validation loss")
+        for i in range(num_validation_batches):
+            # print("computing loss on the {}th validation batch".format(i))
+            validation_feed_batch = {}
+            validation_feed_batch[model.input_data] = validation_feed["x"][i]
+            validation_feed_batch[model.targets] = validation_feed["y"][i]
+            validation_loss_end += sess.run([model.cost, model.final_state], feed_dict=validation_feed_batch)[0]
+            validation_loss_end = validation_loss/num_validation_batches
         print("validation loss after training =", validation_loss_end)
 
         return validation_loss_end

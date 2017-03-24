@@ -11,7 +11,7 @@ class TextLoader():
         self.seq_length = seq_length
         self.encoding = encoding
 
-        input_file = os.path.join(data_dir, "scikit_cleaned.txt")
+        input_file = os.path.join(data_dir, "scikit_cleaned_small.txt")
         vocab_file = os.path.join(data_dir, "vocab.pkl")
         tensor_file = os.path.join(data_dir, "data.npy")
 
@@ -43,10 +43,12 @@ class TextLoader():
         self.vocab_size = len(self.chars)
         self.vocab = dict(zip(self.chars, range(len(self.chars))))
         self.tensor = np.load(tensor_file)
+        print("tensor size : ", self.tensor.size)
         self.num_batches = int(self.tensor.size / (self.batch_size *
                                                    self.seq_length))
 
     def create_batches(self):
+        print("tensor size : ", self.tensor.size)
         self.num_batches = int(self.tensor.size / (self.batch_size *
                                                    self.seq_length))
 

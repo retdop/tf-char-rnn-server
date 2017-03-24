@@ -46,9 +46,8 @@ def objective(args, parameters):
     params = parameters
     params.rnn_size = args['rnn_size']
     params.num_layers = args['num_layers']
-    params.seq_length = args['seq_length']
     params.learning_rate = args['learning_rate']
-    params.save_dir = params.save_dir + '/' + str(args['rnn_size']) + '_' + str(args['num_layers']) + '_' + str(args['seq_length']) + '_' + str(args['learning_rate'])
+    params.save_dir = params.save_dir + '/' + str(args['rnn_size']) + '_' + str(args['num_layers']) + '_' + str(args['learning_rate'])
     loss = train(params)
 
     return loss
@@ -59,7 +58,6 @@ def optimize(params):
     space = {
         'rnn_size': hp.choice('rnn_size', [64, 128, 256, 512]),
         'num_layers': hp.choice('num_layers', [2, 3]),
-        'seq_length': hp.choice('seq_length', [15, 25, 50, 100]),
         'learning_rate': hp.choice('learning_rate', [0.001, 0.002, 0.005])
     }
 
