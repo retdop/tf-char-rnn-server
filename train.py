@@ -95,7 +95,7 @@ def train(args):
         # restore model
         if args.init_from is not None:
             saver.restore(sess, ckpt.model_checkpoint_path)
-        
+
         # creation validation batches
         num_validation_batches = int(data_loader.num_batches/10)
         validation_batches = list(set([random.randint(0,data_loader.num_batches) for i in range(num_validation_batches)]))
@@ -142,9 +142,9 @@ def train(args):
 
                     # computation of the validation loss
                     validation_loss = 0
-                    print("computing validation loss")
+                    # print("computing validation loss")
                     for i in range(num_validation_batches):
-                        print("computing loss on the {}th validation batch".format(i))
+                        # print("computing loss on the {}th validation batch".format(i))
                         validation_feed_batch = {}
                         validation_feed_batch[model.input_data] = validation_feed["x"][i]
                         validation_feed_batch[model.targets] = validation_feed["y"][i]
@@ -155,6 +155,6 @@ def train(args):
 
         print("validation loss after training =", validation_loss_end)
 
-        return validation_loss_global
+        return validation_loss_end
 if __name__ == '__main__':
     main()
